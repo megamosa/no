@@ -1,0 +1,306 @@
+<?php
+/**
+ * MagoArab_WithoutEmail extension
+ *
+ * @category  MagoArab
+ * @package   MagoArab_WithoutEmail
+ * @author    MagoArab
+ */
+?>
+<?php
+/** @var \MagoArab\WithoutEmail\Block\Form\Register $block */
+?>
+<div class="block block-customer-login">
+    <div class="block-title">
+        <strong id="block-customer-login-heading" role="heading" aria-level="2"><?= $block->escapeHtml(__('Create New Customer Account')) ?></strong>
+    </div>
+    <div class="block-content" aria-labelledby="block-customer-login-heading">
+        <form class="form create account form-create-account"
+              action="<?= $block->escapeUrl($block->getPostActionUrl()) ?>"
+              method="post"
+              id="form-validate"
+              enctype="multipart/form-data"
+              autocomplete="off">
+            <?= $block->getBlockHtml('formkey') ?>
+            <fieldset class="fieldset create info">
+                <legend class="legend"><span><?= $block->escapeHtml(__('Personal Information')) ?></span></legend><br>
+                
+                <?php /* Phone number field - Make it first and visually distinct */ ?>
+                <div class="field phone required phone-field-highlight">
+                    <label for="phone_number" class="label"><span><?= $block->escapeHtml(__('Phone Number')) ?></span></label>
+                    <div class="control">
+                        <input type="tel" name="phone_number" id="phone_number"
+                               title="<?= $block->escapeHtmlAttr(__('Phone Number')) ?>"
+                               class="input-text"
+                               data-validate="{required:true, 'validate-number':true, minlength:<?= $block->getMinPhoneLength() ?>, maxlength:<?= $block->getMaxPhoneLength() ?>}"
+                               autocomplete="off">
+                        <div class="note"><?= $block->escapeHtml(__('This will be used as your login identifier')) ?></div>
+                    </div>
+                </div>
+                
+                <div class="field firstname required">
+                    <label class="label" for="firstname"><span><?= $block->escapeHtml(__('First Name')) ?></span></label>
+                    <div class="control">
+                        <input type="text" id="firstname" name="firstname" value="<?= $block->escapeHtmlAttr($block->getFormData()->getFirstname()) ?>" title="<?= $block->escapeHtmlAttr(__('First Name')) ?>" class="input-text required-entry" data-validate="{required:true}">
+                    </div>
+                </div>
+                <div class="field lastname required">
+                    <label class="label" for="lastname"><span><?= $block->escapeHtml(__('Last Name')) ?></span></label>
+                    <div class="control">
+                        <input type="text" id="lastname" name="lastname" value="<?= $block->escapeHtmlAttr($block->getFormData()->getLastname()) ?>" title="<?= $block->escapeHtmlAttr(__('Last Name')) ?>" class="input-text required-entry" data-validate="{required:true}">
+                    </div>
+                </div>
+                
+                <?php if ($block->isNewsletterEnabled()): ?>
+                    <div class="field choice newsletter">
+                        <input type="checkbox" name="is_subscribed" title="<?= $block->escapeHtmlAttr(__('Sign Up for Newsletter')) ?>" value="1" id="is_subscribed" <?= $block->getFormData()->getIsSubscribed() ? 'checked="checked"' : '' ?> class="checkbox">
+                        <label for="is_subscribed" class="label"><span><?= $block->escapeHtml(__('Sign Up for Newsletter')) ?></span></label>
+                    </div>
+                <?php endif ?>
+            </fieldset>
+            
+            <fieldset class="fieldset create account" data-hasrequired="<?= $block->escapeHtmlAttr(__('* Required Fields')) ?>">
+                <legend class="legend"><span><?= $block->escapeHtml(__('Sign-in Information')) ?></span></legend><br>
+                <div class="field password required">
+                    <label for="password" class="label"><span><?= $block->escapeHtml(__('Password')) ?></span></label>
+                    <div class="control">
+                        <input type="password" name="password" id="password"
+                               title="<?= $block->escapeHtmlAttr(__('Password')) ?>"
+                               class="input-text"
+                               data-password-min-length="<?= $block->escapeHtml($block->getMinimumPasswordLength()) ?>"
+                               data-password-min-character-sets="<?= $block->escapeHtml($block->getRequiredCharacterClassesNumber()) ?>"
+                               data-validate="{required:true, 'validate-customer-password':true}"
+                               autocomplete="off">
+                        <div id="password-strength-meter-container" data-role="password-strength-meter" aria-live="polite">
+                            <div id="password-strength-meter" class="password-strength-meter"><?= $block->escapeHtml(__('Password Strength')) ?>:
+                                <span id="password-strength-meter-label" data-role="password-strength-meter-label"><?= $block->escapeHtml(__('No Password')) ?></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field confirmation required">
+                    <label for="password-confirmation" class="label"><span><?= $block->escapeHtml(__('Confirm Password')) ?></span></label>
+                    <div class="control">
+                        <input type="password" name="password_confirmation" title="<?= $block->escapeHtmlAttr(__('Confirm Password')) ?>" id="password-confirmation" class="input-text" data-validate="{required:true, equalTo:'#password'}" autocomplete="off">
+                    </div>
+                </div>
+                
+               <?php
+$viewModel = $block->getData('phone_config');
+?>
+
+<?php if ($viewModel->isOtpEnabled()): ?>
+                <div class="field otp">
+                    <div class="control">
+                        <button type="button" id="send_otp" class="action primary">
+                            <span><?= $block->escapeHtml(__('Get OTP via WhatsApp')) ?></span>
+                        </button>
+                    </div>
+                </div>
+                <div class="field otp required" style="display: none;" id="otp_section">
+                    <label for="otp_code" class="label"><span><?= $block->escapeHtml(__('Enter OTP Code')) ?></span></label>
+                    <div class="control">
+                        <input type="text" name="otp_code" id="otp_code"
+                               title="<?= $block->escapeHtmlAttr(__('OTP Code')) ?>"
+                               class="input-text"
+                               data-validate="{required:true, 'validate-number':true}"
+                               autocomplete="off">
+                    </div>
+                </div>
+                <div class="field otp-verify" style="display: none;" id="otp_verify_section">
+				
+                    <div class="control">
+                        <button type="button" id="verify_otp" class="action primary">
+                            <span><?= $block->escapeHtml(__('Verify OTP')) ?></span>
+                        </button>
+                    </div>
+                </div>
+				<?php endif; ?>
+            </fieldset>
+            
+            <?= $block->getChildHtml('form_additional_info') ?>
+            
+            <div class="actions-toolbar">
+                <div class="primary">
+                    <button type="submit" class="action submit primary" title="<?= $block->escapeHtmlAttr(__('Create an Account')) ?>" id="submit_button" <?php if ($viewModel->isOtpEnabled()): ?>disabled<?php endif; ?>><span><?= $block->escapeHtml(__('Create an Account')) ?></span></button>
+                </div>
+                <div class="secondary">
+                    <a class="action back" href="<?= $block->escapeUrl($block->getBackUrl()) ?>"><span><?= $block->escapeHtml(__('Back')) ?></span></a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="text/x-magento-init">
+{
+    "#form-validate": {
+        "validation": {
+            "rules": {
+                "phone_number": {
+                    "required": true,
+                    "digits": true,
+                    "minlength": <?= $block->getMinPhoneLength() ?>,
+                    "maxlength": <?= $block->getMaxPhoneLength() ?>
+                }
+            },
+            "messages": {
+                "phone_number": {
+                    "required": "<?= $block->escapeJs(__('Please enter your phone number.')) ?>",
+                    "digits": "<?= $block->escapeJs(__('Please enter a valid phone number.')) ?>",
+                    "minlength": "<?= $block->escapeJs(__('Phone number must be at least %1 digits.', $block->getMinPhoneLength())) ?>",
+                    "maxlength": "<?= $block->escapeJs(__('Phone number must not exceed %1 digits.', $block->getMaxPhoneLength())) ?>"
+                }
+            }
+        }
+    },
+    ".field.password": {
+        "passwordStrengthIndicator": {
+            "formSelector": "#form-validate"
+        }
+    },
+    "*": {
+        "Magento_Customer/js/block-submit-on-send": {
+            "formId": "form-validate"
+        }
+    }
+}
+</script>
+
+<script>
+var otpCooldown = 0;
+var otpCooldownInterval;
+require([
+    'jquery',
+    'mage/url',
+    'mage/translate'
+], function($, url, $t) {
+    'use strict';
+
+    $(document).ready(function() {
+        // Send OTP button click
+   $('#send_otp').on('click', function() {
+    var phoneNumber = $('#phone_number').val();
+    
+    if (!phoneNumber) {
+        alert($t('Please enter a valid phone number'));
+        return;
+    }
+    
+    // التحقق من فترة الانتظار
+    if (otpCooldown > 0) {
+        alert($t('Please wait ' + otpCooldown + ' seconds before requesting a new OTP.'));
+        return;
+    }
+    
+    // استخدام المسار المطلق
+    var baseUrl = window.location.protocol + '//' + window.location.host;
+    var ajaxUrl = baseUrl + '/magoarab_withoutemail/otp/send';
+    
+    $.ajax({
+        url: ajaxUrl,
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            phone_number: phoneNumber
+        },
+        beforeSend: function() {
+            $('#send_otp').prop('disabled', true).text($t('Sending...'));
+        },
+        success: function(response) {
+            if (response.success) {
+                $('#otp_section').show();
+                $('#otp_verify_section').show();
+                
+                // بدء فترة انتظار لمدة 60 ثانية
+                startOtpCooldown(60);
+            } else {
+                alert(response.message);
+                $('#send_otp').prop('disabled', false);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("AJAX Error:", xhr.responseText);
+            alert($t('An error occurred. Please try again.'));
+            $('#send_otp').prop('disabled', false).text($t('Get OTP via WhatsApp'));
+        }
+    });
+});
+
+// دالة لبدء فترة الانتظار
+function startOtpCooldown(seconds) {
+    otpCooldown = seconds;
+    
+    // إيقاف أي عداد سابق
+    if (otpCooldownInterval) {
+        clearInterval(otpCooldownInterval);
+    }
+    
+    // تحديث النص على الزر
+    updateOtpButtonText();
+    
+    // بدء العداد التنازلي
+    otpCooldownInterval = setInterval(function() {
+        otpCooldown--;
+        updateOtpButtonText();
+        
+        if (otpCooldown <= 0) {
+            clearInterval(otpCooldownInterval);
+            $('#send_otp').prop('disabled', false).text($t('Resend OTP'));
+        }
+    }, 1000);
+}
+
+// دالة لتحديث نص الزر
+function updateOtpButtonText() {
+    if (otpCooldown > 0) {
+        $('#send_otp').prop('disabled', true).text($t('Resend OTP (%1)').replace('%1', otpCooldown));
+    }
+}
+        
+        // Verify OTP button click
+ $('#verify_otp').on('click', function() {
+    var phoneNumber = $('#phone_number').val();
+    var otpCode = $('#otp_code').val();
+    
+    if (!otpCode) {
+        alert($t('Please enter the OTP code'));
+        return;
+    }
+    
+    // استخدم المسار المطلق (مع البروتوكول والمجال)
+    var baseUrl = window.location.protocol + '//' + window.location.host;
+    var ajaxUrl = baseUrl + '/magoarab_withoutemail/otp/verify';
+    
+    console.log("Sending AJAX request to: " + ajaxUrl); // للتصحيح
+    
+    $.ajax({
+        url: ajaxUrl,
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            phone_number: phoneNumber,
+            otp_code: otpCode
+        },
+        beforeSend: function() {
+            $('#verify_otp').prop('disabled', true).text($t('Verifying...'));
+        },
+        success: function(response) {
+            if (response.success) {
+                $('#verify_otp').text($t('Verified')).addClass('verified');
+                $('#submit_button').prop('disabled', false);
+            } else {
+                alert(response.message);
+                $('#verify_otp').prop('disabled', false).text($t('Verify OTP'));
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("AJAX Error:", xhr.responseText); // للتصحيح
+            alert($t('An error occurred. Please try again.'));
+            $('#verify_otp').prop('disabled', false).text($t('Verify OTP'));
+        }
+    });
+});
+    });
+});
+</script>

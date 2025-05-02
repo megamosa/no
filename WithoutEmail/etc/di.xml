@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * MagoArab_WithoutEmail extension
+ *
+ * @category  MagoArab
+ * @package   MagoArab_WithoutEmail
+ * @author    MagoArab
+ */
+-->
+<config
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+	<!-- Plugins to modify customer account functionality -->
+	<type name="Magento\Customer\Model\AccountManagement">
+		<plugin name="magoarab_withoutemail_account_management" type="MagoArab\WithoutEmail\Plugin\Customer\AccountManagement" sortOrder="10" />
+	</type>
+	<type name="Magento\Customer\Model\Session">
+		<plugin name="magoarab_withoutemail_customer_session" type="MagoArab\WithoutEmail\Plugin\Customer\Session" sortOrder="10" />
+	</type>
+	<!-- Preference for phone number validation -->
+	<preference for="MagoArab\WithoutEmail\Api\Data\PhoneNumberInterface" type="MagoArab\WithoutEmail\Model\PhoneNumber" />
+	<!-- Type definition for Register block -->
+	<type name="MagoArab\WithoutEmail\Block\Form\Register">
+		<arguments>
+			<argument name="configHelper" xsi:type="object">MagoArab\WithoutEmail\Helper\Config</argument>
+		</arguments>
+	</type>
+	<!-- Register Controllers -->
+	<type name="Magento\Framework\App\RouterList">
+		<arguments>
+			<argument name="routerList" xsi:type="array">
+				<item name="magoarab_withoutemail" xsi:type="array">
+					<item name="class" xsi:type="string">Magento\Framework\App\Router\Base</item>
+					<item name="disable" xsi:type="boolean">false</item>
+					<item name="sortOrder" xsi:type="string">10</item>
+				</item>
+			</argument>
+		</arguments>
+	</type>
+	<type name="Magento\Framework\App\Response\Http">
+		<plugin name="magoarab_withoutemail_cors" type="MagoArab\WithoutEmail\Plugin\Response\Http" sortOrder="10" />
+	</type>
+	<type name="Magento\Customer\Controller\Account\EditPost">
+		<plugin name="magoarab_withoutemail_account_edit_post" type="MagoArab\WithoutEmail\Plugin\Customer\AccountManagementEdit" sortOrder="10" />
+	</type>
+	<type name="Magento\Checkout\Block\Checkout\LayoutProcessor">
+		<plugin name="magoarab_withoutemail_checkout_layout_processor" type="MagoArab\WithoutEmail\Plugin\Checkout\LayoutProcessor" sortOrder="10" />
+	</type>
+	<type name="Magento\Checkout\Block\Onepage\Success">
+		<plugin name="magoarab_withoutemail_success_page" type="MagoArab\WithoutEmail\Plugin\Checkout\SuccessPlugin" sortOrder="10" />
+	</type>
+</config>
